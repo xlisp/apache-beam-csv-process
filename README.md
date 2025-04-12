@@ -2,6 +2,36 @@
 
 一个基于Apache Beam的CSV过滤工具，用于从CSV文件中筛选特定字段并输出到新文件。
 
+* java vs clojure: 
+
+```java
+        // Create the pipeline
+        Pipeline pipeline = Pipeline.create(options);
+
+        // Read CSV file
+        PCollection<String> lines = pipeline.apply("ReadCSV", 
+                TextIO.read().from(options.getInputFile()));
+
+        // Filter fields
+        PCollection<String> filteredLines = lines.apply("FilterFields", 
+                ParDo.of(new FilterCSVFields(
+                        options.getFieldIndices(), 
+                        options.getDelimiter(), 
+                        options.getHasHeader())));
+
+        // Write filtered CSV
+        filteredLines.apply("WriteCSV", 
+                TextIO.write().to(options.getOutputFile()).withoutSharding());
+```
+
+```clj
+    (-> pipeline
+        (.apply "ReadLines" (TextIO/read (io/file input-file)))
+        (.apply "ParseCSV" (ParDo/of (create-csv-parser-fn field-indices has-header)))
+        (.setCoder (StringUtf8Coder/of))
+        (.apply "WriteCSV" (TextIO/write (io/file output-file))))
+```
+
 ## 功能
 
 - 从输入CSV文件读取数据
