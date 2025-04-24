@@ -1,0 +1,19 @@
+{
+  "headers": [
+    "ID",
+    "Name",
+    "Age",
+    "Email",
+    "Country",
+    "Salary"
+  ],
+  "types": {
+    "ID": "integer",
+    "Name": "string",
+    "Age": "integer",
+    "Email": "string",
+    "Country": "string",
+    "Salary": "double"
+  },
+  "description": "Employee data format definition"
+}
