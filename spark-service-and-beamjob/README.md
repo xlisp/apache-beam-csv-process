@@ -118,3 +118,97 @@
 
 这个解决方案确保了两个项目完全解耦，同时添加了解析format.json并处理表头的功能。
 
+---
+
+# 使用CHOR方案
+
+使用CHOR（可能是指协程或消息编排系统）来管理作业查询和触发。我将修改`spark-service`项目以支持CHOR消息通信模式。
+
+### 解决方案说明
+
+我设计了一个基于JMS的CHOR消息系统，支持作业触发和状态查询。系统包含以下主要特点：
+
+#### 1. CHOR消息支持
+
+- 使用ActiveMQ作为JMS消息代理
+- 定义了三个关键消息队列：
+  - `job-request-queue`：接收作业请求消息
+  - `job-status-queue`：发送作业状态更新
+  - `job-result-queue`：发送作业完成结果
+
+#### 2. 消息类型
+
+添加了多种CHOR消息类型支持：
+- `START_JOB`：触发新的CSV处理作业
+- `GET_JOB_STATUS`：查询特定作业状态
+- `GET_ALL_JOBS`：获取所有作业的状态
+- `JOB_STATUS`：作业状态响应
+- `JOB_RESULT`：作业完成结果响应
+- `ALL_JOBS_STATUS`：所有作业状态响应
+
+#### 3. 作业流程集成
+
+- 接收CHOR消息来启动作业
+- 在作业执行的关键阶段发送状态更新
+- 作业完成时发送详细结果
+- 保留原有的REST API接口，实现双重接入方式
+
+#### 4. 配置参数化
+
+- 消息队列名称可配置
+- Spark应用JAR路径可配置
+- 服务器端口和其他参数可通过配置文件调整
+
+### 使用指南
+
+#### 设置消息队列
+
+1. 安装并启动ActiveMQ
+   ```bash
+   # 下载ActiveMQ
+   wget https://downloads.apache.org/activemq/5.17.2/apache-activemq-5.17.2-bin.tar.gz
+   tar -xzf apache-activemq-5.17.2-bin.tar.gz
+   
+   # 启动ActiveMQ
+   cd apache-activemq-5.17.2
+   bin/activemq start
+   ```
+
+2. 修改应用配置文件
+   - 更新`spring.activemq.broker-url`指向你的ActiveMQ服务器
+   - 设置`sparkapp.jar.path`为你的Spark应用JAR路径
+
+#### 发送CHOR消息
+
+可以使用任何JMS客户端或工具发送消息，例如：
+
+1. 使用ActiveMQ Console
+2. 使用Spring JMS测试客户端
+3. 使用专用的CHOR消息发送工具
+
+消息示例：
+```json
+{
+  "type": "START_JOB",
+  "inputFile": "/data/input.csv",
+  "outputFile": "/data/output.csv",
+  "fields": "0,2,5",
+  "delimiter": ",",
+  "formatJsonPath": "/data/format.json"
+}
+```
+
+#### 监听CHOR响应
+
+设置监听器来接收以下队列的消息：
+- `job-status-queue`：获取作业状态更新
+- `job-result-queue`：获取作业完成结果
+
+这种基于CHOR消息的设计允许你的系统：
+1. 解耦组件之间的通信
+2. 实现异步作业处理
+3. 支持分布式部署
+4. 提供可靠的状态跟踪和通知
+
+如果你需要进一步的改进，可以考虑添加消息持久化、消息重试机制或更复杂的消息路由策略。
+

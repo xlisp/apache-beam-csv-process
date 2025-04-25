@@ -1,0 +1,61 @@
+// 1. 启动作业的消息
+{
+  "type": "START_JOB",
+  "inputFile": "/data/input.csv",
+  "outputFile": "/data/output.csv",
+  "fields": "0,2,5",
+  "delimiter": ",",
+  "formatJsonPath": "/data/format.json"
+}
+
+// 2. 查询特定作业状态的消息
+{
+  "type": "GET_JOB_STATUS",
+  "jobId": "job-1650382745123"
+}
+
+// 3. 查询所有作业状态的消息
+{
+  "type": "GET_ALL_JOBS"
+}
+
+// 4. 作业状态响应消息示例
+{
+  "type": "JOB_STATUS",
+  "jobId": "job-1650382745123",
+  "status": "RUNNING",
+  "timestamp": 1650382746000
+}
+
+// 5. 作业结果响应消息示例
+{
+  "type": "JOB_RESULT",
+  "jobId": "job-1650382745123",
+  "success": true,
+  "outputFile": "/data/output.csv",
+  "timestamp": 1650382850000
+}
+
+// 6. 所有作业状态响应消息示例
+{
+  "type": "ALL_JOBS_STATUS",
+  "jobs": [
+    {
+      "jobId": "job-1650382745123",
+      "status": "COMPLETED",
+      "inputFile": "/data/input.csv",
+      "outputFile": "/data/output.csv",
+      "startTime": 1650382745000,
+      "duration": 105000
+    },
+    {
+      "jobId": "job-1650383745123",
+      "status": "RUNNING",
+      "inputFile": "/data/input2.csv",
+      "outputFile": "/data/output2.csv",
+      "startTime": 1650383745000,
+      "duration": 30000
+    }
+  ],
+  "timestamp": 1650383775000
+}
